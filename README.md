@@ -1,11 +1,13 @@
-# Blowfly_project
+# Blowfly project
+
+The goal of the blowfly projetc is 1. update a newly chromosomal scale genome assembly 2. Using the genome as reference 
 
 # Blowfly Genome Assembly
 
 The script was written by Sheng-Hao (Mayson). The pipeline shown is to generate a contiguous and comprehensive chromosomal scale level of Hi-C intergated genome assembly, providing valuable insights into the genomic landscape and enhancing its utility as a reference.
 
 
-The following pipeline is summarized as below:
+The following genome assembly pipeline is summarized as below:
 
 
 ![workflow](https://github.com/user-attachments/assets/d1434268-683b-4299-aed8-d8459e65046e)
