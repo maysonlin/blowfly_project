@@ -65,3 +65,120 @@ Step 3. execute the script at HPC
 **3. Using Blobtools to filter the contaminated sequences**
 
 The pipeline insruction and guide can be found in [Blobtool 2 https://blobtoolkit.genomehubs.org/blobtools2/]. 
+
+**4. Apply Yahs workflow to perform Hi-C integrated assembly**
+
+*** At first step, use Arima mapping to create bam file of Hi-C fasq to genome mapping file***
+
+
+**BWA index**
+
+
+
+`SRA='HHY-1_'
+LABEL='overall_exp_name'
+module load bwa
+module load samtools
+module load jdk
+IN_DIR='~/fastq/'
+REF='~/input.fa'
+FAIDX='$REF.fai'
+PREFIX='/~/bwainput/'
+RAW_DIR='/rawdata/mapping'
+FILT_DIR='/~/filtered/'
+FILTER='~/filter_five_end.pl'
+COMBINER='~/two_read_bam_combiner.pl'
+STATS='~/mapping_pipeline-master/get_stats.pl'
+PICARD='/home/slin023/picard/build/libs/picard.jar'
+TMP_DIR='~/mapping/tmp_files'
+PAIR_DIR='~/mapping/bams'
+REP_DIR='~/deduplicated/'
+REP_LABEL=$LABEL\_rep1
+MERGE_DIR='~/replicates'
+MAPQ_FILTER=10
+CPU=12`
+
+`echo "### Step 0: Check output directories exist & create them as needed"
+[ -d $RAW_DIR ] || mkdir -p $RAW_DIR
+[ -d $FILT_DIR ] || mkdir -p $FILT_DIR
+[ -d $TMP_DIR ] || mkdir -p $TMP_DIR
+[ -d $PAIR_DIR ] || mkdir -p $PAIR_DIR
+[ -d $REP_DIR ] || mkdir -p $REP_DIR
+[ -d $MERGE_DIR ] || mkdir -p $MERGE_DIR`
+
+`echo "### Step 0: Index reference" # Run only once! Skip this step if you have already generated BWA index files`
+`bwa index -a bwtsw $REF`
+
+`echo "### Step 1.A: FASTQ to BAM (1st)`
+`bwa mem -t $CPU $REF $IN_DIR/HHY-1_R1.fastq | samtools view -@ 12  -o $RAW_DIR/HHY_1_R1.bam`
+
+`echo "### Step 1.B: FASTQ to BAM (2nd)`
+`bwa  mem -t $CPU $REF $IN_DIR/HHY-1_R2.fastq | samtools view -@ 12 -o $RAW_DIR/HHY_1_R2.bam`
+
+`echo "### Step 2.A: Filter 5' end (1st)`
+`samtools view -h $RAW_DIR/HHY_1_R1.bam | perl $FILTER | samtools view -@ 12 -o $FILT_DIR/HHY_1_R1.bam`
+
+`echo "### Step 2.B: Filter 5' end (2nd)`
+`samtools view -h $RAW_DIR/HHY_1_R2.bam | perl $FILTER | samtools view -@ 12  -o $FILT_DIR/HHY_1_R2.bam`
+
+`echo "### Step 3A: Pair reads & mapping quality filter`
+`perl $COMBINER $FILT_DIR/HHY_1_R1.bam $FILT_DIR/HHY_1_R2.bam $SAMTOOLS $MAPQ_FILTER | samtools view -bS -t $FAIDX - | samtools sort -@ 12 -o $TMP_DIR/$SRA.bam`
+
+**Step 4A done seperately because combine perl script is looking for abosolute path of samtools**
+
+`perl /~/two_read_bam_combiner.pl ~/filtered/HHY_1_R1.bam ~/mapping/filtered/HHY_1_R2.bam ~/spack/applications/gcc-8.2.0/samtools-1.9-o53igvdgqlbqwbewcsot53hcgwwsvel4/bin/samtools 10 > ~/mapping_pipeline-master/all.bam` 
+
+`samtools view ~/all.bam -t ~/bwa/input.fa.fai  -o ~/mapping/all1.bam`
+
+
+`samtools sort -@ 12 -n -o $TMP_DIR/$SRA.bam /scratch/mdegenna/slin023/mapping/Arima_mapping.bam`
+
+
+
+**5. Run yahs to use Arima mapping .bam as input to create contact matrices **
+
+`export PATH=$PATH:~/yahs`
+
+
+`yahs ~/input.fa ~/Arima_mapping.bam`
+
+This step generates 3 output files:
+
+1. yahs.out.bin
+2. yahs.out_scaffolds_final.agp
+3. yahs.out_scaffolds_final.fa
+
+Generate HiC contact map that can be loaded by Juicebox
+
+`export PATH=$PATH:~/yahs`
+
+`juicer pre -a -o out_JBAT ~/all1.bed ~/yahs.out_scaffolds_final.agp  >out_JBAT.log ~/input.fa.fai 2>&1`
+
+
+**make sure to create fai file for original genome before run the command above**
+
+
+The step generated 5 output files:
+
+* out_JBAT.liftover.agp
+* out_JBAT.assembly.agp
+* out_JBAT.assembly
+* out_JBAT.txt
+* out_JBAT.log
+
+out_JBAT.log will tell you what command you should run next
+
+You need to run:
+
+`module load jdk `
+
+`java -Xmx36G -jar ~/juicer_tools.1.9.9_jcuda.0.8.jar pre out_JBAT.txt out_JBAT.hic <(echo "assembly 534549832")`
+
+This will generate "out_JBAT.hic"
+
+Download Juicer Box locally, use the .agp file generated from step 1 and .hic matrix file to manually edit the genome
+
+
+If you have output file, use this command to generate the fasta file based on your matrix index
+
+`juicer post -o out_JBAT revised.out_JBAT.assembly ~/yahs/out_JBAT.liftover.agp ~/input.fa`
