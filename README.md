@@ -66,7 +66,7 @@ Step 3. execute the script at HPC
 
 **3. Using Blobtools to filter the contaminated sequences**
 
-The pipeline insruction and guide can be found in [Blobtool 2 https://blobtoolkit.genomehubs.org/blobtools2/]. 
+The pipeline insruction and guide can be found in [Blobtool 2](https://blobtoolkit.genomehubs.org/blobtools2/). 
 
 **4. Apply Yahs workflow to perform Hi-C integrated assembly**
 
@@ -184,3 +184,13 @@ Download Juicer Box locally, use the .agp file generated from step 1 and .hic ma
 If you have output file, use this command to generate the fasta file based on your matrix index
 
 `juicer post -o out_JBAT revised.out_JBAT.assembly ~/yahs/out_JBAT.liftover.agp ~/input.fa`
+
+
+Reference:
+1. Cheng H, Concepcion GT, Feng X, Zhang H, Li H. Haplotype-resolved de novo assembly using phased assembly graphs with hifiasm. Nat Methods. 2021;18: 170–175.
+2. Guan D, McCarthy SA, Wood J, Howe K, Wang Y, Durbin R. Identifying and removing haplotypic duplication in primary genome assemblies. Bioinformatics. 2020;36: 2896–2898.
+3. Challis R, Richards E, Rajan J, Cochrane G, Blaxter M. BlobToolKit – Interactive Quality Assessment of Genome Assemblies. G3 Genes|Genomes|Genetics. 2020;10: 1361–1374.
+4. Zhou C, McCarthy SA, Durbin R. YaHS: yet another Hi-C scaffolding tool. Bioinformatics. Edited by C. Alkan; 2023.
+5. Durand NC, Robinson JT, Shamim MS, Machol I, Mesirov JP, Lander ES, et al. Juicebox Provides a Visualization System for Hi-C Contact Maps with Unlimited Zoom. Cell Syst. 2016;3: 99–101.
+6. Palmer JM. Funannotate: pipeline for genome annotation. 2016.
+
