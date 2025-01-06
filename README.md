@@ -186,6 +186,12 @@ If you have output file, use this command to generate the fasta file based on yo
 `juicer post -o out_JBAT revised.out_JBAT.assembly ~/yahs/out_JBAT.liftover.agp ~/input.fa`
 
 
+
+
+
+
+
+
 Reference:
 1. Cheng H, Concepcion GT, Feng X, Zhang H, Li H. Haplotype-resolved de novo assembly using phased assembly graphs with hifiasm. Nat Methods. 2021;18: 170–175.
 2. Guan D, McCarthy SA, Wood J, Howe K, Wang Y, Durbin R. Identifying and removing haplotypic duplication in primary genome assemblies. Bioinformatics. 2020;36: 2896–2898.
